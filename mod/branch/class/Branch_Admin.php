@@ -300,14 +300,14 @@ class Branch_Admin {
             include(PHPWS_SOURCE_DIR . 'core/boost/boost.php');
             $db->addValue('version', $version);
             $result = $db->insert();
-            $db->disconnect();
             if (PHPWS_Error::isError($result)) {
                 PHPWS_Error::log($result);
                 return $result;
             }
+            $db->loadDB();
             return true;
         } else {
-            $db->disconnect();
+            $db->loadDB();
             return $result;
         }
     }
@@ -417,7 +417,7 @@ class Branch_Admin {
         }
 
         // Load branch database
-        PHPWS_DB::loadDB($this->getDSN(), $this->dbprefix);
+        PHPWS_DB::loadDB($this->getDSN(), $this->dbprefix, false, false);
 
         $this->title = dgettext('branch', 'Installing core modules');
 
@@ -427,6 +427,7 @@ class Branch_Admin {
             PHPWS_Error::log($result);
             $this->content[] = dgettext('branch', 'An error occurred while trying to install your modules.')
             . ' ' . dgettext('branch', 'Please check your error logs and try again.');
+            PHPWS_DB::loadDB();
             return true;
         } else {
             $this->content[] = $result;

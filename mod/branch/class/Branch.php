@@ -236,9 +236,9 @@ class Branch {
         }
 
         $prefix = Branch::getHubPrefix();
-        PHPWS_DB::loadDB($dsn, $prefix);
         $GLOBALS['Branch_Temp']['dsn'] = $GLOBALS['PHPWS_DB']['dsn'];
         $GLOBALS['Branch_Temp']['prefix'] = $GLOBALS['PHPWS_DB']['tbl_prefix'];
+        PHPWS_DB::loadDB($dsn, $prefix);
     }
 
     /**
