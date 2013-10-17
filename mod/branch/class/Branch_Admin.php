@@ -90,7 +90,9 @@ class Branch_Admin {
      */
     public function direct()
     {
-        if (!@$command = $_REQUEST['command']) {
+        if (isset($_REQUEST['command'])) {
+            $command = $_REQUEST['command'];
+        } else {
             $command = $this->panel->getCurrentTab();
         }
 
