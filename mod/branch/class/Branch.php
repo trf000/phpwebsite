@@ -239,6 +239,7 @@ class Branch {
         $GLOBALS['Branch_Temp']['dsn'] = $GLOBALS['PHPWS_DB']['dsn'];
         $GLOBALS['Branch_Temp']['prefix'] = $GLOBALS['PHPWS_DB']['tbl_prefix'];
         PHPWS_DB::loadDB($dsn, $prefix);
+        \Database::phpwsDSNLoader($dsn, $prefix);
     }
 
     /**
@@ -259,9 +260,20 @@ class Branch {
      */
     public static function restoreBranchDB()
     {
-        $prefix = $dsn = null;
-        extract($GLOBALS['Branch_Temp']);
-        PHPWS_DB::loadDB($dsn, $prefix);
+        if (\PHPWS_Core::isBranch()) {
+            if (defined('PHPWS_TABLE_PREFIX')) {
+                $prefix = PHPWS_TABLE_PREFIX;
+            } else {
+                $prefix = null;
+            }
+            PHPWS_DB::loadDB(PHPWS_DSN, $prefix);
+            \Database::phpwsDSNLoader(PHPWS_DSN, $prefix);
+        } else {
+            $prefix = $dsn = null;
+            extract($GLOBALS['Branch_Temp']);
+            PHPWS_DB::loadDB($dsn, $prefix);
+            \Database::phpwsDSNLoader($dsn, $prefix);
+        }
     }
 
     /**
