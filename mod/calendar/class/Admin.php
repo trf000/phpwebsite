@@ -172,11 +172,11 @@ class Calendar_Admin
 
         $form->addText('location', $event->location);
         $form->setLabel('location', 'Location');
-        $form->setSize('location', 60);
+//        $form->setSize('location', 60);
 
         $form->addText('loc_link', $event->loc_link);
         $form->setLabel('loc_link', 'Location link');
-        $form->setSize('loc_link', 60);
+        $form->setSize('loc_link', 255);
 
         $form->addTextArea('description', $event->description);
 
