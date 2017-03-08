@@ -150,6 +150,13 @@ class Menu_Link {
                 $icon = '<i class="fa fa-file-pdf-o fa-fw" style="font-size : 80%"></i>';
             }
         }
+        
+        if (preg_match('/^https?:/', $this->url)) {
+        	$target = "_blank";
+        } else {
+        	$target = "_self";
+        }
+        
         return sprintf('<a href="%s" class="menu-link-href"%s id="menu-link-href-%s" title="%s">%s%s</a>',
                 str_replace('&', '&amp;', $this->url), $data, $this->id,
                 $this->title, $this->title, $icon);
