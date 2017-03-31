@@ -69,12 +69,12 @@ class Calendar_Admin
         $pager->addToggle('class="bgcolor2"');
 
         $page_tags['TITLE_LABEL'] = dgettext('calendar', 'Title / Time / Description');
-        $page_tags['LOCATION_LABEL'] = 'Location';
-        $page_tags['ACTION_LABEL'] = 'Action';
-        $pager->setEmptyMessage('No suggestions to approve.');
+        $page_tags['LOCATION_LABEL'] = dgettext('calendar', 'Location');
+        $page_tags['ACTION_LABEL'] = dgettext('calendar', 'Action');
+        $pager->setEmptyMessage(dgettext('calendar', 'No suggestions to approve.'));
         $pager->addPageTags($page_tags);
 
-        $this->title = 'Suggested events';
+        $this->title = dgettext('calendar', 'Suggested events');
         $this->content = $pager->get();
     }
 
@@ -125,9 +125,9 @@ class Calendar_Admin
     public function editEvent($event)
     {
         if ($event->id) {
-            $this->title = 'Update event';
+            $this->title = dgettext('calendar', 'Update event');
         } else {
-            $this->title = 'Create event';
+            $this->title = dgettext('calendar', 'Create event');
         }
 
         $this->content = self::event_form($event);
@@ -136,9 +136,9 @@ class Calendar_Admin
     public function editSchedule()
     {
         if ($this->calendar->schedule->id) {
-            $this->title = 'Update schedule';
+            $this->title = dgettext('calendar', 'Update schedule');
         } else {
-            $this->title = 'Create schedule';
+            $this->title = dgettext('calendar', 'Create schedule');
         }
 
         $this->content = $this->calendar->schedule->form();
@@ -149,10 +149,13 @@ class Calendar_Admin
      */
     public static function event_form(Calendar_Event $event, $suggest = false)
     {
-        javascript('datetimepicker');
+    	javascript('jquery_ui');
+    	javascript('ckeditor');
+    	javascript('datetimepicker', null, false, false, true);
         Layout::addStyle('calendar');
         // the form id is linked to the check_date javascript
         $form = new PHPWS_Form('event_form');
+        /* $form->appendCSS('form-inline'); */
         if (isset($_REQUEST['js'])) {
             $form->addHidden('js', 1);
         }
@@ -167,18 +170,22 @@ class Calendar_Admin
         $form->addHidden('sch_id', $event->_schedule->id);
 
         $form->addText('summary', $event->summary);
-        $form->setLabel('summary', 'Summary');
+        $form->setClass('summary', 'form-control');
+        $form->setLabel('summary', dgettext('calendar', 'Event Title'));
         $form->setSize('summary', 60);
 
         $form->addText('location', $event->location);
-        $form->setLabel('location', 'Location');
+        $form->setClass('location', 'form-control');
+        $form->setLabel('location', dgettext('calendar', 'Location'));
         $form->setSize('location', 60);
 
         $form->addText('loc_link', $event->loc_link);
-        $form->setLabel('loc_link', 'Location link');
+        $form->setClass('loc_link', 'form-control');
+        $form->setLabel('loc_link', dgettext('calendar', 'Location link'));
         $form->setSize('loc_link', 60);
 
         $form->addTextArea('description', $event->description);
+        $form->setClass('description', 'form-control');
 
         if ($suggest) {
             $form->setRows('description', 8);
@@ -187,17 +194,21 @@ class Calendar_Admin
             $form->useEditor('description');
         }
 
-        $form->setLabel('description', 'Description');
+        $form->setLabel('description', dgettext('calendar', 'Description'));
 
         $form->addText('start_date', $event->getStartTime('%Y/%m/%d'));
-        $form->setLabel('start_date', 'Start time');
+        $form->setClass('start_date', 'datepicker form-control');
+        $form->setSize('start_date', 20);
+        $form->setLabel('start_date', dgettext('calendar', 'Start time'));
         $form->setExtra('start_date', 'onblur="check_start_date()"');
-
+        
         $form->addText('end_date', $event->getEndTime('%Y/%m/%d'));
-        $form->setLabel('end_date', 'End time');
+        $form->setClass('end_date', 'datepicker form-control');
+        $form->setSize('end_date', 20);
+        $form->setLabel('end_date', dgettext('calendar', 'End time'));
         $form->setExtra('end_date', 'onblur="check_end_date()" onfocus="check_start_date()"');
 
-        $event->timeForm('start_time', $event->start_time, $form);
+       $event->timeForm('start_time', $event->start_time, $form);
         $event->timeForm('end_time', $event->end_time, $form);
 
         $form->setExtra('start_time_hour', 'onchange="check_start_date()"');
@@ -205,26 +216,27 @@ class Calendar_Admin
 
         $form->addCheck('all_day', 1);
         $form->setMatch('all_day', $event->all_day);
-        $form->setLabel('all_day', 'All day event');
+        $form->setLabel('all_day', dgettext('calendar', 'All day event'));
         $form->setExtra('all_day', 'onchange="alter_date(this)"');
 
         if (!$suggest) {
             $form->addCheck('show_busy', 1);
             $form->setMatch('show_busy', $event->show_busy);
-            $form->setLabel('show_busy', 'Show busy');
+            $form->setLabel('show_busy', dgettext('calendar', 'Show busy'));
         }
 
         if ($suggest) {
-            $form->addSubmit('save', 'Suggest event');
+            $form->addSubmit('save', dgettext('calendar', 'Suggest event'));
         } else {
             // Suggested events are not allowed repeats
             /**
              * Repeat form elements
              */
             $form->addCheck('repeat_event', 1);
-            $form->setLabel('repeat_event', 'Make a repeating event');
+            $form->setLabel('repeat_event', dgettext('calendar', 'Make a repeating event'));
 
             $form->addText('end_repeat_date', $event->getEndRepeat('%Y/%m/%d'));
+            $form->setClass('end_repeat_date', 'form-control');
             $form->setLabel('end_repeat_date', dgettext('calendar', 'Repeat event until:'));
 
             $modes = array('daily',
@@ -234,11 +246,11 @@ class Calendar_Admin
                 'every');
 
 
-            $modes_label = array('Daily',
-                'Weekly',
-                'Monthly',
-                'Yearly',
-                'Every');
+            $modes_label = array(dgettext('calendar', 'Daily'),
+                dgettext('calendar', 'Weekly'),
+                dgettext('calendar', 'Monthly'),
+                dgettext('calendar', 'Yearly'),
+                dgettext('calendar', 'Every'));
 
             $form->addRadio('repeat_mode', $modes);
             $form->setLabel('repeat_mode', $modes_label);
@@ -257,21 +269,22 @@ class Calendar_Admin
             $form->addCheck('weekday_repeat', $weekdays);
             $form->setLabel('weekday_repeat', $weekday_labels);
 
-            $monthly = array('begin' => 'Beginning of each month',
-                'end' => 'End of each month',
-                'start' => 'Every month on start date'
+            $monthly = array('begin' => dgettext('calendar', 'Beginning of each month'),
+                'end' => dgettext('calendar', 'End of each month'),
+                'start' => dgettext('calendar', 'Every month on start date')
             );
 
             $form->addSelect('monthly_repeat', $monthly);
+            $form->setClass('monthly_repeat', 'form-control');
 
-            $every_repeat_week = array(1 => '1st',
-                2 => '2nd',
-                3 => '3rd',
-                4 => '4th',
-                5 => 'Last'
+            $every_repeat_week = array(1 => dgettext('calendar', '1st'),
+                2 => dgettext('calendar', '2nd'),
+                3 => dgettext('calendar', '3rd'),
+                4 => dgettext('calendar', '4th'),
+                5 => dgettext('calendar', 'Last')
             );
 
-            $frequency = array('every_month' => 'Every month',
+            $frequency = array('every_month' => dgettext('calendar', 'Every month'),
                 1 => strftime('%B', mktime(0, 0, 0, 1, 1, 1970)),
                 2 => strftime('%B', mktime(0, 0, 0, 2, 1, 1970)),
                 3 => strftime('%B', mktime(0, 0, 0, 3, 1, 1970)),
@@ -325,25 +338,25 @@ class Calendar_Admin
             if ($event->pid) {
                 $form->addHidden('pid', $event->pid);
                 // This is a repeat copy, if saved it removes it from the copy list
-                $form->addSubmit('save', 'Save and remove repeat');
+                $form->addSubmit('save', dgettext('calendar', 'Save and remove repeat'));
                 $form->setExtra('save', sprintf('onclick="return confirm(\'%s\')"', dgettext('calendar', 'Remove event from repeat list?')));
             } elseif ($event->id && $event->repeat_type) {
                 // This is event is a source repeating event
                 // Save this
                 // Not sure if coding this portion. commenting for now
-                // $form->addSubmit('save_source', 'Save this event only');
-                $form->addSubmit('save_copy', 'Save and apply to repeats');
+                // $form->addSubmit('save_source', dgettext('calendar', 'Save this event only'));
+                $form->addSubmit('save_copy', dgettext('calendar', 'Save and apply to repeats'));
                 $form->setExtra('save_copy', sprintf('onclick="return confirm(\'%s\')"', dgettext('calendar', 'Apply changes to repeats?')));
             } else {
                 // this is a non-repeating event
-                $form->addSubmit('save', 'Save event');
+                $form->addSubmit('save', dgettext('calendar', 'Save event'));
             }
         }
 
         $tpl = $form->getTemplate();
         if (!$suggest) {
-            $tpl['EVENT_TAB'] = 'Event';
-            $tpl['REPEAT_TAB'] = 'Repeat';
+            $tpl['EVENT_TAB'] = dgettext('calendar', 'Event');
+            $tpl['REPEAT_TAB'] = dgettext('calendar', 'Repeat');
         }
 
         if (isset($event->_error)) {
@@ -358,11 +371,11 @@ class Calendar_Admin
                 $linkvar['js'] = 1;
             }
 
-            $source_link = PHPWS_Text::moduleLink('Click here if you would prefer to edit the source event.', 'calendar', $linkvar);
-            $tpl['REPEAT_WARNING'] = 'This is a repeat of another event.' . '<br />' . $source_link;
+            $source_link = PHPWS_Text::moduleLink(dgettext('calendar', 'Click here if you would prefer to edit the source event.'), 'calendar', $linkvar);
+            $tpl['REPEAT_WARNING'] = dgettext('calendar', 'This is a repeat of another event.') . '<br />' . $source_link;
         }
 
-        $tpl['SYNC'] = sprintf('<input type="button" style="display : none" id="sync-dates" onclick="sync_dates(); return false;" name="sync-dates" value="%s" />', 'Sync dates');
+        $tpl['SYNC'] = sprintf('<input type="button" style="display : none" id="sync-dates" onclick="sync_dates(); return false;" name="sync-dates" value="%s" />', dgettext('calendar', 'Sync dates'));
 
         if (javascriptEnabled()) {
             Layout::addJSHeader('<script src="' . PHPWS_SOURCE_HTTP . 'mod/calendar/javascript/edit_event/head.js"></script>');
@@ -377,12 +390,12 @@ class Calendar_Admin
         $panel = new PHPWS_Panel('calendar');
 
         $vars['aop'] = 'schedules';
-        $tabs['schedules'] = array('title' => 'Schedules',
+        $tabs['schedules'] = array('title' => dgettext('calendar', 'Schedules'),
             'link' => PHPWS_Text::linkAddress('calendar', $vars));
 
         if (Current_User::allow('calendar', 'settings')) {
             $vars['aop'] = 'settings';
-            $tabs['settings'] = array('title' => 'Settings',
+            $tabs['settings'] = array('title' => dgettext('calendar', 'Settings'),
                 'link' => PHPWS_Text::linkAddress('calendar', $vars));
         }
 
@@ -574,7 +587,7 @@ class Calendar_Admin
             case 'delete_schedule':
                 if (Current_User::authorized('calendar', 'delete_schedule') && Current_User::isUnrestricted('calendar')) {
                     $this->calendar->schedule->delete();
-                    $this->sendMessage('Schedule deleted.', 'aop=schedules');
+                    $this->sendMessage(dgettext('calendar', 'Schedule deleted.'), 'aop=schedules');
                 } else {
                     Current_User::disallow();
                 }
@@ -601,7 +614,7 @@ class Calendar_Admin
                 if (Current_User::isUnrestricted('calendar')) {
                     PHPWS_Settings::set('calendar', 'public_schedule', (int) $_REQUEST['sch_id']);
                     PHPWS_Settings::save('calendar');
-                    $this->message = 'Default public schedule set.';
+                    $this->message = dgettext('calendar', 'Default public schedule set.');
                 }
                 $this->scheduleListing();
                 break;
@@ -615,7 +628,7 @@ class Calendar_Admin
                     Current_User::disallow();
                 }
                 $this->postSettings();
-                $this->message = 'Settings saved';
+                $this->message = dgettext('calendar', 'Settings saved');
                 $this->settings();
                 break;
 
@@ -685,10 +698,10 @@ class Calendar_Admin
         $error = false;
         if (empty($_FILES['upload_file']['tmp_name'])) {
             $error = true;
-            $content[] = 'Missing filename.';
+            $content[] = dgettext('calendar', 'Missing filename.');
         } elseif ($_FILES['upload_file']['type'] != 'text/calendar') {
             $error = true;
-            $content[] = 'Improper file format.';
+            $content[] = dgettext('calendar', 'Improper file format.');
         }
 
         if (!$error) {
@@ -696,7 +709,7 @@ class Calendar_Admin
 
             if (!is_array($result)) {
                 $error = true;
-                $content[] = 'Unable to parse file for events.';
+                $content[] = dgettext('calendar', 'Unable to parse file for events.');
             } elseif (trim($result[0]) != 'BEGIN:VCALENDAR') {
                 $error = true;
                 $content[] = dgettext('calendar', 'File does not appear to be in iCal/vCal format.');
@@ -704,8 +717,8 @@ class Calendar_Admin
         }
 
         if ($error) {
-            $content[] = $this->calendar->schedule->uploadEventsLink(false, 'Return to upload form...');
-            $this->title = 'Error';
+            $content[] = $this->calendar->schedule->uploadEventsLink(false, dgettext('calendar', 'Return to upload form...'));
+            $this->title = dgettext('calendar', 'Error');
             $this->content = implode('<br />', $content);
             return;
         }
@@ -805,7 +818,7 @@ class Calendar_Admin
 
                         if (!empty($result)) {
                             if (PHPWS_Error::logIfError($result)) {
-                                $parse_errors[] = 'Error accessing event table.';
+                                $parse_errors[] = dgettext('calendar', 'Error accessing event table.');
                             } else {
                                 $duplicates++;
                             }
@@ -813,7 +826,7 @@ class Calendar_Admin
                             $save = $event->save();
 
                             if (PHPWS_Error::logIfError($save) || !$save) {
-                                $parse_errors[] = 'Error saving new event.';
+                                $parse_errors[] = dgettext('calendar', 'Error saving new event.');
                             } else {
                                 $success++;
                             }
@@ -845,8 +858,8 @@ class Calendar_Admin
         $form->addHidden('js', 1);
         $form->addHidden('sch_id', $this->calendar->schedule->id);
         $form->addFile('upload_file');
-        $form->setLabel('upload_file', 'File location');
-        $form->addSubmit('go', 'Send file');
+        $form->setLabel('upload_file', dgettext('calendar', 'File location'));
+        $form->addSubmit('go', dgettext('calendar', 'Send file'));
         $tpl = $form->getTemplate();
         $tpl['CLOSE'] = javascript('close_window');
         $this->content = PHPWS_Template::process($tpl, 'calendar', 'upload.tpl');
@@ -881,17 +894,17 @@ class Calendar_Admin
             if (PHPWS_Error::isError($result)) {
                 PHPWS_Error::log($result);
                 if (PHPWS_Calendar::isJS()) {
-                    Layout::nakedDisplay('An error occurred when saving your event.');
+                    Layout::nakedDisplay(dgettext('calendar', 'An error occurred when saving your event.'));
                     exit();
                 } else {
-                    $this->sendMessage('An error occurred when saving your event.', 'aop=schedules');
+                    $this->sendMessage(dgettext('calendar', 'An error occurred when saving your event.'), 'aop=schedules');
                 }
             } else {
                 $result = $this->saveRepeat($event);
                 if (PHPWS_Error::isError($result)) {
                     if (PHPWS_Calendar::isJS()) {
                         PHPWS_Error::log($result);
-                        Layout::nakedDisplay('An error occurred when trying to repeat an event.', 'aop=schedules');
+                        Layout::nakedDisplay(dgettext('calendar', 'An error occurred when trying to repeat an event.'), 'aop=schedules');
                         exit();
                     } else {
                         $this->sendMessage(dgettext('calendar', 'An error occurred when trying to repeat an event.', 'aop=schedules'));
@@ -904,9 +917,9 @@ class Calendar_Admin
 
                 $view = filter_input(INPUT_POST, 'view');
                 if (!empty($view)) {
-                    $this->sendMessage('Event saved.', 'view=' . $view . '&date=' . $event->start_time . '&event_id=' . $event->id . '&sch_id=' . $this->calendar->schedule->id);
+                    $this->sendMessage(dgettext('calendar', 'Event saved.'), 'view=' . $view . '&date=' . $event->start_time . '&event_id=' . $event->id . '&sch_id=' . $this->calendar->schedule->id);
                 } else {
-                    $this->sendMessage('Event saved.', 'aop=schedules');
+                    $this->sendMessage(dgettext('calendar', 'Event saved.'), 'aop=schedules');
                 }
             }
         } else {
@@ -926,6 +939,7 @@ class Calendar_Admin
 
         PHPWS_Settings::set('calendar', 'display_mini', (int) $_POST['display_mini']);
         PHPWS_Settings::set('calendar', 'starting_day', (int) $_POST['starting_day']);
+        PHPWS_Settings::set('calendar', 'cal_manager', $_POST['cal_manager']);
         PHPWS_Settings::set('calendar', 'default_view', $_POST['default_view']);
         PHPWS_Settings::set('calendar', 'brief_grid', $_POST['brief_grid']);
 
@@ -1022,12 +1036,12 @@ class Calendar_Admin
             if (PHPWS_Error::isError($result)) {
                 PHPWS_Error::log($result);
                 if (PHPWS_Calendar::isJS()) {
-                    $this->sendMessage('An error occurred when saving your schedule.', null, false);
+                    $this->sendMessage(dgettext('calendar', 'An error occurred when saving your schedule.'), null, false);
                     javascript('close_refresh');
                     Layout::nakedDisplay();
                     exit();
                 } else {
-                    $this->sendMessage('An error occurred when saving your schedule.', 'aop=schedules');
+                    $this->sendMessage(dgettext('calendar', 'An error occurred when saving your schedule.'), 'aop=schedules');
                 }
             } else {
                 if ($this->calendar->schedule->public && ($default_public < 1)) {
@@ -1045,7 +1059,7 @@ class Calendar_Admin
                     Layout::nakedDisplay();
                     exit();
                 } else {
-                    $this->sendMessage('Schedule saved.', 'aop=schedules');
+                    $this->sendMessage(dgettext('calendar', 'Schedule saved.'), 'aop=schedules');
                 }
             }
         } else {
@@ -1098,7 +1112,7 @@ class Calendar_Admin
     public function repeatEvent($event)
     {
         if (!$event->id) {
-            $this->content = 'This event does not exist.';
+            $this->content = dgettext('calendar', 'This event does not exist.');
             return;
         }
 
@@ -1311,7 +1325,7 @@ class Calendar_Admin
     public function repeatWeekly(Calendar_Event $event)
     {
         if (!isset($_POST['weekday_repeat']) || !is_array($_POST['weekday_repeat'])) {
-            $this->message = 'You must choose which weekdays to repeat.';
+            $this->message = dgettext('calendar', 'You must choose which weekdays to repeat.');
             return false;
         }
 
@@ -1357,14 +1371,14 @@ class Calendar_Admin
         }
         return TRUE;
     }
-
+   
     public static function eventModal($event)
     {
-        $event_form = self::event_form($event);
-        $modal = new \phpws2\Modal('edit-event', $event_form, 'Edit Event');
-        $modal->setWidthPixel(650);
-        $modal->addButton('<button class="btn btn-success" id="submit-event">Save</button>');
-        return $modal->__toString();
+    	$event_form = self::event_form($event);
+    	$modal = new \phpws2\Modal('edit-event', $event_form, 'Edit Event');
+    	$modal->setWidthPixel(800);
+    	$modal->addButton('<button class="btn btn-success" id="submit-event">Save</button>');
+    	return $modal->__toString();
     }
 
     public static function includeScheduleJS()
@@ -1411,22 +1425,22 @@ class Calendar_Admin
         $schedule = new Calendar_Schedule;
         $schedule->id = 1;
 
-        $this->title = 'Schedules';
+        $this->title = dgettext('calendar', 'Schedules');
 
         $event = new Calendar_Event(0, $schedule);
         $page_tags['EVENT_FORM'] = self::eventModal($event);
-        $page_tags['DESCRIPTION_LABEL'] = 'Description';
-        $page_tags['PUBLIC_LABEL'] = 'Public';
-        $page_tags['DISPLAY_NAME_LABEL'] = 'User';
-        $page_tags['AVAILABILITY_LABEL'] = 'Availability';
+        $page_tags['DESCRIPTION_LABEL'] = dgettext('calendar', 'Description');
+        $page_tags['PUBLIC_LABEL'] = dgettext('calendar', 'Public');
+        $page_tags['DISPLAY_NAME_LABEL'] = dgettext('calendar', 'User');
+        $page_tags['AVAILABILITY_LABEL'] = dgettext('calendar', 'Availability');
 
-        $page_tags['ADD_CALENDAR'] = '<button id="create-schedule" class="btn btn-success"><i class="fa fa-file-text"></i> ' . 'Create schedule' . '</button>';
+        $page_tags['ADD_CALENDAR'] = '<button id="create-schedule" class="btn btn-success"><i class="fa fa-file-text"></i> ' . dgettext('calendar', 'Create schedule') . '</button>';
 
         $schedule_form = $this->calendar->schedule->form();
         $schedule_modal = new \phpws2\Modal('schedule-modal', $schedule_form, 'Create schedule');
         $schedule_modal->sizeLarge();
         $page_tags['SCHEDULE_FORM'] = $schedule_modal->__toString();
-        $page_tags['ADMIN_LABEL'] = 'Options';
+        $page_tags['ADMIN_LABEL'] = dgettext('calendar', 'Options');
 
         $pager = new DBPager('calendar_schedule', 'Calendar_Schedule');
         $pager->setModule('calendar');
@@ -1434,9 +1448,9 @@ class Calendar_Admin
         $pager->addPageTags($page_tags);
         $pager->addRowTags('rowTags');
         $pager->addToggle('class="bgcolor1"');
-        $pager->setEmptyMessage('No schedules have been created.');
-        $pager->addSortHeader('title', 'Title');
-        $pager->addSortHeader('public', 'Availability');
+        $pager->setEmptyMessage(dgettext('calendar', 'No schedules have been created.'));
+        $pager->addSortHeader('title', dgettext('calendar', 'Title'));
+        $pager->addSortHeader('public', dgettext('calendar', 'Availability'));
 
         $pager->db->addWhere('user_id', 0);
         $pager->db->addWhere('user_id', 'users.id', '=', 'or');
@@ -1468,19 +1482,19 @@ class Calendar_Admin
 
         $form->addCheckbox('allow_submissions', 1);
         $form->setMatch('allow_submissions', PHPWS_Settings::get('calendar', 'allow_submissions'));
-        $form->setLabel('allow_submissions', 'Allow public event submissions');
+        $form->setLabel('allow_submissions', dgettext('calendar', 'Allow public event submissions'));
 
         $form->addCheckbox('mini_event_link', 1);
         $form->setMatch('mini_event_link', PHPWS_Settings::get('calendar', 'mini_event_link'));
-        $form->setLabel('mini_event_link', 'Only link days with events in mini calendar');
+        $form->setLabel('mini_event_link', dgettext('calendar', 'Only link days with events in mini calendar'));
 
         $form->addCheckbox('anon_ical', 1);
         $form->setMatch('anon_ical', PHPWS_Settings::get('calendar', 'anon_ical'));
-        $form->setLabel('anon_ical', 'Allow anonymous iCal exports of public schedules');
+        $form->setLabel('anon_ical', dgettext('calendar', 'Allow anonymous iCal exports of public schedules'));
 
         $form->addCheckbox('no_follow', 1);
         $form->setMatch('no_follow', PHPWS_Settings::get('calendar', 'no_follow'));
-        $form->setLabel('no_follow', 'No follow directives added to navigation links');
+        $form->setLabel('no_follow', dgettext('calendar', 'No follow directives added to navigation links'));
 
         $start_days = array(0, 1);
         $start_days_label[0] = strftime('%A', mktime(0, 0, 0, 1, 4, 1970));
@@ -1491,11 +1505,11 @@ class Calendar_Admin
 
         $form->addRadio('brief_grid', array(0, 1));
         $form->setMatch('brief_grid', PHPWS_Settings::get('calendar', 'brief_grid'));
-        $form->setLabel('brief_grid', array(0 => 'Show event titles',
-            1 => 'Show number of events'));
+        $form->setLabel('brief_grid', array(0 => dgettext('calendar', 'Show event titles'),
+            1 => dgettext('calendar', 'Show number of events')));
 
         $form->addCheck('personal_schedules', 1);
-        $form->setLabel('personal_schedules', 'Allow personal schedules');
+        $form->setLabel('personal_schedules', dgettext('calendar', 'Allow personal schedules'));
         $form->setMatch('personal_schedules', PHPWS_Settings::get('calendar', 'personal_schedules'));
 
         $form->addCheck('cache_month_views', 1);
@@ -1503,32 +1517,38 @@ class Calendar_Admin
         $form->setMatch('cache_month_views', PHPWS_Settings::get('calendar', 'cache_month_views'));
 
         $form->addCheck('mini_grid', 1);
-        $form->setLabel('mini_grid', 'Show mini grid');
+        $form->setLabel('mini_grid', dgettext('calendar', 'Show mini grid'));
         $form->setMatch('mini_grid', PHPWS_Settings::get('calendar', 'mini_grid'));
 
         $form->addRadio('display_mini', array(0, 1, 2));
-        $form->setLabel('display_mini', array(dgettext('calendar', 'Don\'t show'), 'Only on front page', 'On all pages'));
+        $form->setLabel('display_mini', array(dgettext('calendar', 'Don\'t show'), dgettext('calendar', 'Only on front page'), dgettext('calendar', 'On all pages')));
         $form->setMatch('display_mini', PHPWS_Settings::get('calendar', 'display_mini'));
+        
+        $form->addText('cal_manager', PHPWS_Settings::get('calendar', 'cal_manager'));
+        $form->setClass('cal_manager', 'form-control');
+        $form->setLabel('cal_manager', dgettext('calendar', 'Calendar Manager'));
+        
 
-        $views['grid'] = 'Month grid';
-        $views['list'] = 'Month list';
-        $views['day'] = 'Day view';
-        $views['week'] = 'Week view';
+        $views['grid'] = dgettext('calendar', 'Month grid');
+        $views['list'] = dgettext('calendar', 'Month list');
+        $views['day'] = dgettext('calendar', 'Day view');
+        $views['week'] = dgettext('calendar', 'Week view');
 
         $form->addSelect('default_view', $views);
-        $form->setLabel('default_view', 'Default view');
+        $form->setLabel('default_view', dgettext('calendar', 'Default view'));
         $form->setMatch('default_view', PHPWS_Settings::get('calendar', 'default_view'));
 
-        $form->addSubmit('Save settings');
+        $form->addSubmit(dgettext('calendar', 'Save settings'));
+        $form->setClass('submit', 'btn btn-primary');
         $tpl = $form->getTemplate();
 
-        $tpl['BRIEF_GRID_LABEL'] = 'Grid event display';
-        $tpl['MINI_CALENDAR'] = 'Display mini calendar';
+        $tpl['BRIEF_GRID_LABEL'] = dgettext('calendar', 'Grid event display');
+        $tpl['MINI_CALENDAR'] = dgettext('calendar', 'Display mini calendar');
 
-        $tpl['START_LABEL'] = 'Week start day';
+        $tpl['START_LABEL'] = dgettext('calendar', 'Week start day');
 
         $this->content = PHPWS_Template::process($tpl, 'calendar', 'admin/settings.tpl');
-        $this->title = 'Calendar settings';
+        $this->title = dgettext('calendar', 'Calendar settings');
     }
 
     public function blogEvent()
@@ -1540,20 +1560,20 @@ class Calendar_Admin
         $form->addHidden('event_id', $event->id);
         $form->addHidden('sch_id', $this->calendar->schedule->id);
 
-        $advance[0] = 'Date of occurence';
-        $advance[1] = 'A day prior';
-        $advance[2] = 'Two days prior';
-        $advance[3] = 'Three days prior';
-        $advance[7] = 'A week prior';
-        $advance[14] = 'Two weeks prior';
-        $advance[30] = 'One month prior';
+        $advance[0] = dgettext('calendar', 'Date of occurence');
+        $advance[1] = dgettext('calendar', 'A day prior');
+        $advance[2] = dgettext('calendar', 'Two days prior');
+        $advance[3] = dgettext('calendar', 'Three days prior');
+        $advance[7] = dgettext('calendar', 'A week prior');
+        $advance[14] = dgettext('calendar', 'Two weeks prior');
+        $advance[30] = dgettext('calendar', 'One month prior');
         $form->addSelect('advance_post', $advance);
         $form->setLabel('advance_post', dgettext('calendar', 'When should it post?'));
-        $form->addSubmit('Post to Blog');
+        $form->addSubmit(dgettext('calendar', 'Post to Blog'));
 
         $tpl = $form->getTemplate();
         $tpl['CLOSE'] = javascript('close_window');
-        $this->title = 'Post Event to Blog';
+        $this->title = dgettext('calendar', 'Post Event to Blog');
         $this->content = PHPWS_Template::process($tpl, 'calendar', 'admin/forms/blog.tpl');
     }
 
