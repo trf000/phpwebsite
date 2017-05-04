@@ -446,10 +446,12 @@ class Menu {
                     Layout::set($menu->view(), 'menu', 'side');
                 }
 
-                if ($menu->assoc_image) {
+               
+            }
+            
+             if ($menu->assoc_image) {
                     Layout::set($menu->showAssocImage(), 'menu', 'image');
                 }
-            }
 
             $menu_tpl['menus'][] = self::getCategoryViewLine($menu, $active);
         }
