@@ -213,6 +213,10 @@ class Calendar_Admin
             $form->setMatch('show_busy', $event->show_busy);
             $form->setLabel('show_busy', 'Show busy');
         }
+        
+        if (ALLOW_CAPTCHA) {
+            $form->addTplTag('CAPTCHA_IMAGE', Captcha::get());
+        }
 
         if ($suggest) {
             $form->addSubmit('save', 'Suggest event');
